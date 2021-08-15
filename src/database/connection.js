@@ -1,8 +1,9 @@
-import Mongoose  from "mongoose";
+import Mongoose from "mongoose";
+import config from '../config';
 
-const connecToDB = async ()=>{
+const connecToDB = async () => {
     try {
-        await Mongoose.connect('mongodb://localhost:27017/products',{
+        await Mongoose.connect(config.URI_DB, {
             useNewUrlParser: true,
             useCreateIndex: true,
             useUnifiedTopology: true,

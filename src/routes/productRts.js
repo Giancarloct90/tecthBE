@@ -9,6 +9,7 @@ const router = Router();
 router.get('/products', getProducts);
 // router.get('/products',getOneProducts);
 router.post('/products', postProducts);
+
 // router.delete('/products',deleteProducts);
 // router.put('/products',updateProducts);
 

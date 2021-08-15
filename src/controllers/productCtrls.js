@@ -2,11 +2,12 @@ import Products from '../models/productMdls';
 import cloudinary from 'cloudinary';
 import fs from 'fs-extra';
 import e from 'express';
+import config from '../config';
 
 cloudinary.config({
-  cloud_name: "ddnzwfrmo",
-  api_key: "751465344374982",
-  api_secret: "MNMtnqvFuL4XBiRu5LLXPtxygEA"
+  cloud_name: config.CLOUD_NAME,
+  api_key: config.API_KEY,
+  api_secret: config.API_SECRET
 })
 
 export const getProducts = async (req, res) => {
@@ -15,20 +16,40 @@ export const getProducts = async (req, res) => {
       disponible: true
     });
     res.status(200).json({
+      ok: true,
       products: productsDB
     });
+    return;
   } catch (error) {
     console.log('error trying to get products')
+    res.status(500).json({
+      ok: false,
+      message: 'Error to get all data'
+    });
   }
 
 };
 
+// export const yay = async (req, res) => {
+//   let { nombre,
+//     precio,
+//     cantidad,
+//   } = req.body;
+//   console.log(nombre, precio, cantidad);
+//   res.status(200).json({
+//     ok: true,
+//     message: 'Recived'
+//   })
+// }
+
 export const postProducts = async (req, res) => {
-  let { nombre, precio, cantidad } = req.body;
-  console.log( nombre, precio, cantidad);
+  let {
+    nombre,
+    precio,
+    cantidad
+  } = req.body;
   const imageUploaded = await uploadImageCloud(req.file.path);
   if (imageUploaded.ok) {
-    
     try {
       const product = new Products();
       product.nombre = nombre;
@@ -37,17 +58,19 @@ export const postProducts = async (req, res) => {
       product.cantidad = cantidad;
       product.disponible = true;
       const productDB = await product.save();
-      if(productDB){
+      if (productDB) {
         res.status(200).json({
           ok: true,
           message: 'Success',
         });
-      }else{
-        res.status(500).json({
-          ok: false,
-          message: 'error to insert server'
-        });
+        return;
       }
+      res.status(500).json({
+        ok: false,
+        message: 'error to insert server'
+      });
+      return;
+
     } catch (e) {
       console.log('Error Trying insert');
       console.log(e);
@@ -55,13 +78,16 @@ export const postProducts = async (req, res) => {
         ok: false,
         message: 'error to insert server'
       });
+      return;
     }
-  }else{
-    res.status(500).json({
-      ok: false,
-      message: 'error to upload image'
-    });
+
   }
+  console.log(imageUploaded.message);
+  res.status(500).json({
+    ok: false,
+    message: 'error to upload image'
+  });
+  return;
 };
 
 const uploadImageCloud = async (image) => {
@@ -76,7 +102,7 @@ const uploadImageCloud = async (image) => {
   } catch (error) {
     return {
       ok: false,
-      message: e
+      message: error
     }
   }
 }

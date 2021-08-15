@@ -1,5 +1,5 @@
 import express  from "express";
-import config from './config'
+import config from './config';
 import productRoutes from './routes/productRts'
 import cors from 'cors';
 import morgan from 'morgan';
