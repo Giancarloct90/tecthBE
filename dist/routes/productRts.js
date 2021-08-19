@@ -9,11 +9,11 @@ var _express = require("express");
 
 var _productCtrls = require("../controllers/productCtrls");
 
+var _validateProducts = require("./validateProducts");
+
 var router = (0, _express.Router)();
-router.get('/products', _productCtrls.getProducts); // router.get('/products',getOneProducts);
-
-router.post('/products', _productCtrls.postProducts); // router.delete('/products',deleteProducts);
-// router.put('/products',updateProducts);
-
+router.get('/', _productCtrls.getWelcome);
+router.get('/products', _productCtrls.getProducts);
+router.post('/products', (0, _validateProducts.validateProductRules)(), _validateProducts.validate, _productCtrls.postProducts);
 var _default = router;
 exports["default"] = _default;

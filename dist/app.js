@@ -33,7 +33,7 @@ app.use(_express["default"].urlencoded({
 app.use(_express["default"].json());
 
 var storage = _multer["default"].diskStorage({
-  destination: _path["default"].join(__dirname, '../public/'),
+  destination: _path["default"].join(__dirname, './public/'),
   filename: function filename(req, file, fnCallback) {
     fnCallback(null, "".concat(new Date().getTime() + _path["default"].extname(file.originalname)));
   }

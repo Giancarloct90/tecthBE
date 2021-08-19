@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.postProducts = exports.getProducts = void 0;
+exports.getWelcome = exports.postProducts = exports.getProducts = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
@@ -13,20 +13,9 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 
 var _productMdls = _interopRequireDefault(require("../models/productMdls"));
 
-var _cloudinary = _interopRequireDefault(require("cloudinary"));
+var _utils = require("./utils/utils");
 
-var _fsExtra = _interopRequireDefault(require("fs-extra"));
-
-var _express = _interopRequireDefault(require("express"));
-
-var _config = _interopRequireDefault(require("../config"));
-
-_cloudinary["default"].config({
-  cloud_name: _config["default"].CLOUD_NAME,
-  api_key: _config["default"].API_KEY,
-  api_secret: _config["default"].API_SECRET
-});
-
+// TO GET ALL PRODUCTS
 var getProducts = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(req, res) {
     var productsDB;
@@ -42,172 +31,180 @@ var getProducts = /*#__PURE__*/function () {
 
           case 3:
             productsDB = _context.sent;
-            res.status(200).json({
+
+            if (productsDB) {
+              _context.next = 6;
+              break;
+            }
+
+            return _context.abrupt("return", res.status(500).json({
+              ok: false,
+              message: 'Error trying to get Products'
+            }));
+
+          case 6:
+            return _context.abrupt("return", res.status(200).json({
               ok: true,
               products: productsDB
-            });
-            return _context.abrupt("return");
+            }));
 
-          case 8:
-            _context.prev = 8;
+          case 9:
+            _context.prev = 9;
             _context.t0 = _context["catch"](0);
-            console.log('error trying to get products');
-            res.status(500).json({
+            console.log('Error with the DB Server');
+            return _context.abrupt("return", res.status(500).json({
               ok: false,
-              message: 'Error to get all data'
-            });
+              message: 'Error with the DB Server',
+              e: _context.t0
+            }));
 
-          case 12:
+          case 13:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[0, 8]]);
+    }, _callee, null, [[0, 9]]);
   }));
 
   return function getProducts(_x, _x2) {
     return _ref.apply(this, arguments);
   };
-}(); // export const yay = async (req, res) => {
-//   let { nombre,
-//     precio,
-//     cantidad,
-//   } = req.body;
-//   console.log(nombre, precio, cantidad);
-//   res.status(200).json({
-//     ok: true,
-//     message: 'Recived'
-//   })
-// }
+}(); //TO INSERT A PRODUCTS TO DB 
 
 
 exports.getProducts = getProducts;
 
 var postProducts = /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(req, res) {
-    var _req$body, nombre, precio, cantidad, imageUploaded, product, productDB;
+    var _req$body, nombre, precio, cantidad, message, params, _imagen, imageUploaded, product, productDB;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            _req$body = req.body, nombre = _req$body.nombre, precio = _req$body.precio, cantidad = _req$body.cantidad;
-            _context2.next = 3;
-            return uploadImageCloud(req.file.path);
+            _req$body = req.body, nombre = _req$body.nombre, precio = _req$body.precio, cantidad = _req$body.cantidad; // console.log(req.file);
 
-          case 3:
-            imageUploaded = _context2.sent;
-
-            if (!imageUploaded.ok) {
-              _context2.next = 28;
+            if (req.file) {
+              _context2.next = 5;
               break;
             }
 
+            message = ['La imagen no puede estar vacio'];
+            params = ['file'];
+            return _context2.abrupt("return", res.status(200).json({
+              ok: false,
+              validate: true,
+              message: message,
+              params: params
+            }));
+
+          case 5:
             _context2.prev = 5;
+            _imagen = req.file.path;
+            _context2.next = 9;
+            return (0, _utils.uploadImageCloud)(_imagen);
+
+          case 9:
+            imageUploaded = _context2.sent;
+
+            if (!imageUploaded.ok) {
+              _context2.next = 35;
+              break;
+            }
+
+            _context2.prev = 11;
             product = new _productMdls["default"]();
             product.nombre = nombre;
             product.precio = precio;
             product.imagen = imageUploaded.imageUpload.url;
             product.cantidad = cantidad;
             product.disponible = true;
-            _context2.next = 14;
+            _context2.next = 20;
             return product.save();
 
-          case 14:
+          case 20:
             productDB = _context2.sent;
 
             if (!productDB) {
-              _context2.next = 18;
+              _context2.next = 23;
               break;
             }
 
-            res.status(200).json({
+            return _context2.abrupt("return", res.status(200).json({
               ok: true,
-              message: 'Success'
-            });
-            return _context2.abrupt("return");
+              message: 'El producto se guardo con exito'
+            }));
 
-          case 18:
-            res.status(500).json({
-              ok: false,
-              message: 'error to insert server'
-            });
-            return _context2.abrupt("return");
+          case 23:
+            _context2.next = 25;
+            return (0, _utils.deleteAFIle)(_imagen);
 
-          case 22:
-            _context2.prev = 22;
-            _context2.t0 = _context2["catch"](5);
-            console.log('Error Trying insert');
-            console.log(_context2.t0);
-            res.status(500).json({
+          case 25:
+            return _context2.abrupt("return", res.status(500).json({
               ok: false,
-              message: 'error to insert server'
-            });
-            return _context2.abrupt("return");
+              message: 'Error in DATABASE'
+            }));
 
           case 28:
-            console.log(imageUploaded.message);
-            res.status(500).json({
-              ok: false,
-              message: 'error to upload image'
-            });
-            return _context2.abrupt("return");
+            _context2.prev = 28;
+            _context2.t0 = _context2["catch"](11);
+            _context2.next = 32;
+            return (0, _utils.deleteAFIle)(_imagen);
 
-          case 31:
+          case 32:
+            console.log('Error Trying insert');
+            console.log(_context2.t0);
+            return _context2.abrupt("return", res.status(500).json({
+              ok: false,
+              message: 'Error in DATABASE'
+            }));
+
+          case 35:
+            console.log(imageUploaded.message);
+            _context2.next = 38;
+            return (0, _utils.deleteAFIle)(_imagen);
+
+          case 38:
+            return _context2.abrupt("return", res.status(500).json({
+              ok: false,
+              message: 'Error Upload Image'
+            }));
+
+          case 41:
+            _context2.prev = 41;
+            _context2.t1 = _context2["catch"](5);
+            _context2.next = 45;
+            return (0, _utils.deleteAFIle)(imagen);
+
+          case 45:
+            console.log('Error with image');
+            return _context2.abrupt("return", res.status(400).json({
+              ok: false,
+              message: 'Error Upload Image'
+            }));
+
+          case 47:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[5, 22]]);
+    }, _callee2, null, [[5, 41], [11, 28]]);
   }));
 
   return function postProducts(_x3, _x4) {
     return _ref2.apply(this, arguments);
   };
-}();
+}(); // WELCOME TO API
+
 
 exports.postProducts = postProducts;
 
-var uploadImageCloud = /*#__PURE__*/function () {
-  var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(image) {
-    var imageUpload;
-    return _regenerator["default"].wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            _context3.prev = 0;
-            _context3.next = 3;
-            return _cloudinary["default"].v2.uploader.upload(image);
+var getWelcome = function getWelcome(req, res) {
+  return res.status(200).json({
+    ok: true,
+    message: 'Hello Hellooo',
+    api_name: 'techStore'
+  });
+};
 
-          case 3:
-            imageUpload = _context3.sent;
-            _context3.next = 6;
-            return _fsExtra["default"].unlink(image);
-
-          case 6:
-            console.log('subido');
-            return _context3.abrupt("return", {
-              ok: true,
-              imageUpload: imageUpload
-            });
-
-          case 10:
-            _context3.prev = 10;
-            _context3.t0 = _context3["catch"](0);
-            return _context3.abrupt("return", {
-              ok: false,
-              message: _context3.t0
-            });
-
-          case 13:
-          case "end":
-            return _context3.stop();
-        }
-      }
-    }, _callee3, null, [[0, 10]]);
-  }));
-
-  return function uploadImageCloud(_x5) {
-    return _ref3.apply(this, arguments);
-  };
-}();
+exports.getWelcome = getWelcome;
