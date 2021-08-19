@@ -105,6 +105,8 @@ export const getWelcome = (req, res) => {
   return res.status(200).json({
     ok: true,
     message: 'Hello Hellooo',
-    api_name: 'techStore'
+    api_name: 'techStore',
+    version: '1.0.2',
+    date: '19-08-21'
   })
 }
